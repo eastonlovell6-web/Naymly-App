@@ -13,6 +13,9 @@ module.exports = {
         ink: '#000000',
         surface: '#FFFFFF',
       },
+      fontFamily: {
+        serif: ['Georgia'],
+      },
     },
   },
   plugins: [],
