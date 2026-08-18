@@ -44,3 +44,6 @@ example
 
 # claude-flow local session state
 .claude-flow/
+
+# superpowers subagent-driven-development scratch workspace
+.superpowers/
