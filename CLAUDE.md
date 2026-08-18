@@ -4,19 +4,21 @@
 *Update this section before ending every session. This is the only source of truth for what's built vs. not — don't infer progress from git history alone, keep this current.*
 
 **Last updated:** 2026-08-18
-**Current phase:** Phase 1 — Core Loop (not yet started)
-**Currently building:** Nothing yet — project scaffold not created
+**Current phase:** Phase 1 — Core Loop (in progress)
+**Currently building:** Project scaffold — Expo/TypeScript/NativeWind/Zustand done; WatermelonDB schema and Supabase project intentionally deferred
 **Completed screens/features:**
-- (none yet)
+- Project scaffold: `create-expo-app` default template (Expo SDK 57, TypeScript strict, Expo Router, `src/` layout) with NativeWind 4 (Tailwind config carries the brand color tokens from Design System) and Zustand installed. Verified via `npx tsc --noEmit` (clean) and `npx expo export --platform web` (bundles successfully, Tailwind CSS compiles). Not yet booted in the iOS simulator.
 
 **Up next (in order):**
-1. Project scaffold: Expo + TypeScript + NativeWind, Supabase project + auth wiring, WatermelonDB schema
+1. WatermelonDB schema (deferred from original step 1, scoped down to what the Capture screen needs — full domain schema like Place/ContactPlace/Brief waits for the phases that need them) — Supabase still on hold, so no sync adapter yet, local-only schema
 2. Capture screen (name + photo + context tags, local save only)
 3. Basic contact list / review screen (manual, no AI yet)
+4. Supabase project + auth wiring (resume when ready — was deliberately held off during scaffold)
 
 **Blockers / open questions:**
 - Native Swift widget/Live Activity extension setup not yet scaffolded — needs Expo prebuild + config plugin research before Phase 3 work starts
 - 30+ response validation survey still outstanding (see [[Projects/namelock]])
+- One pre-existing lint error in the Expo template's own boilerplate (`src/hooks/use-color-scheme.web.ts:11`, `react-hooks/set-state-in-effect`) — not introduced by us, left as-is
 
 ---
 
