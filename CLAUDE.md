@@ -5,17 +5,21 @@
 
 **Last updated:** 2026-08-18
 **Current phase:** Phase 1 — Core Loop (in progress)
-**Currently building:** Project scaffold — Expo/TypeScript/NativeWind/Zustand done; WatermelonDB schema and Supabase project intentionally deferred
+**Currently building:** WatermelonDB schema — code written but UNVERIFIED at runtime (see blockers). Supabase project still deliberately on hold.
 **Completed screens/features:**
 - Project scaffold: `create-expo-app` default template (Expo SDK 57, TypeScript strict, Expo Router, `src/` layout) with NativeWind 4 (Tailwind config carries the brand color tokens from Design System) and Zustand installed. Verified via `npx tsc --noEmit` (clean) and `npx expo export --platform web` (bundles successfully, Tailwind CSS compiles). Not yet booted in the iOS simulator.
+- WatermelonDB schema/model/repository (`src/db/`) — scoped to just what the Capture screen needs: a `contacts` table (name, photo, context tags). Full domain schema (Place, ContactPlace, Brief) intentionally deferred to the phases that need them.
+- PII encryption (`src/lib/encryption.ts`) — resolves the Hard Rules' Day-1 "encrypted at rest" bar. Uses `expo-crypto`'s native AES-256-GCM module (hardware-backed via CryptoKit on iOS) with a key generated once and stored in the iOS Keychain via `expo-secure-store` (`WHEN_UNLOCKED_THIS_DEVICE_ONLY`). `Contact` model exposes only ciphertext as raw WatermelonDB fields (`name_cipher`, `photo_uri_cipher`, `context_tags_cipher`); decryption happens through async `getName()`/`getPhotoUri()`/`getContextTags()` methods. `src/db/repositories/contacts.ts#createContact` encrypts before every write. Considered and rejected `crypto-js` (flagged itself as unmaintained mid-install) and a third-party native AES library (`react-native-aes-gcm-crypto`, last published 2022) in favor of the first-party Expo module.
 
 **Up next (in order):**
-1. WatermelonDB schema (deferred from original step 1, scoped down to what the Capture screen needs — full domain schema like Place/ContactPlace/Brief waits for the phases that need them) — Supabase still on hold, so no sync adapter yet, local-only schema
-2. Capture screen (name + photo + context tags, local save only)
+1. **Verify WatermelonDB actually works** — first real `expo prebuild && expo run:ios`. Not yet possible: Xcode.app isn't installed on this machine (only Command Line Tools — no `simctl`/`xcodebuild`). Install Xcode, then run this before or alongside the Capture screen; do not assume WatermelonDB works until this has actually run.
+2. Capture screen (name + photo + context tags, local save only) — first real exercise of the DB/encryption code above
 3. Basic contact list / review screen (manual, no AI yet)
 4. Supabase project + auth wiring (resume when ready — was deliberately held off during scaffold)
 
 **Blockers / open questions:**
+- **Xcode.app not installed** on this machine — blocks all native builds (`expo run:ios`, simulator testing, and eventually the Live Activity/widget extensions). Needs to be installed from the App Store before task 1 above can happen.
+- **WatermelonDB New Architecture compatibility is unverified.** `expo-doctor` flags it as "Untested on New Architecture" (RN 0.86 / Expo 57 default). No official Expo support exists (open feature request since 2018); the community plugin (`@morrowdigital/watermelondb-expo-plugin`) was only verified against Expo SDK 47/48, years before the New Architecture. A Nov 2025 community comment suggested favoring alternatives (op-sqlite, InstantDB) instead. Schema/model code is written and type-checks, but treat it as **unproven** until the first real simulator build. If it breaks, the fallback options already identified are `op-sqlite` or `expo-sqlite` + a thin reactive layer.
 - Native Swift widget/Live Activity extension setup not yet scaffolded — needs Expo prebuild + config plugin research before Phase 3 work starts
 - 30+ response validation survey still outstanding (see [[Projects/namelock]])
 - One pre-existing lint error in the Expo template's own boilerplate (`src/hooks/use-color-scheme.web.ts:11`, `react-hooks/set-state-in-effect`) — not introduced by us, left as-is
