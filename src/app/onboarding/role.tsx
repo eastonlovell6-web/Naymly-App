@@ -3,7 +3,6 @@ import { Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PrimaryButton } from '@/components/onboarding/primary-button';
-import { ProgressDots } from '@/components/onboarding/progress-dots';
 import type { OnboardingRole } from '@/lib/onboarding-status';
 import { useOnboardingStore } from '@/state/onboarding';
 
@@ -21,7 +20,6 @@ export default function RoleScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex-1 justify-between px-6 py-8">
-        <ProgressDots current={2} total={2} />
         <View className="gap-4">
           <Text className="font-serif text-3xl text-ink">What brings you to Naymly?</Text>
           <View className="gap-3" accessibilityRole="radiogroup">
