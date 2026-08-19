@@ -8,6 +8,8 @@ import { PrimaryButton } from '@/components/onboarding/primary-button';
 // WatermelonDB write) in its own roadmap task. This satisfies onboarding's
 // integration contract — route in, route to success with a `captured` flag —
 // without implementing real capture logic here.
+// NOTE for the real implementation: read `useOnboardingStore().role` (set in
+// role.tsx and persisted via Zustand) as an input for suggested context tags.
 export default function CaptureScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">

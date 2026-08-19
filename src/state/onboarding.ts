@@ -19,13 +19,22 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
   hasOnboarded: null,
   role: null,
   loadFromStorage: async () => {
-    const [hasOnboarded, role] = await Promise.all([getHasOnboarded(), getStoredRole()]);
-    set({ hasOnboarded, role });
+    try {
+      const [hasOnboarded, role] = await Promise.all([getHasOnboarded(), getStoredRole()]);
+      set({ hasOnboarded, role });
+    } catch {
+      set({ hasOnboarded: false });
+    }
   },
   setRole: (role) => set({ role }),
   complete: async () => {
     const { role } = get();
-    await setOnboarded(role);
+    try {
+      await setOnboarded(role);
+    } catch {
+      // Storage write failed — still let the user proceed rather than
+      // leaving them stuck on the success screen with no way forward.
+    }
     set({ hasOnboarded: true });
   },
 }));
