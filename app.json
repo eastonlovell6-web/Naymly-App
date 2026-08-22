@@ -53,7 +53,14 @@
           "isAndroidBackgroundLocationEnabled": true
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Naymly uses your microphone to capture a contact by voice.",
+          "speechRecognitionPermission": "Naymly uses speech recognition to turn what you say into a contact."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
