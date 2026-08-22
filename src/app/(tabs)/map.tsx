@@ -46,6 +46,7 @@ export default function MapScreen() {
     } catch (error) {
       console.error('Failed to get current location:', error);
       if (!cancelledRef.current) {
+        setPermissionDenied(false);
         setLocationError(true);
       }
     }
