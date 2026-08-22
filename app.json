@@ -8,7 +8,11 @@
     "scheme": "naymlyapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.eastonlovell.naymly-app",
+      "infoPlist": {
+        "UIBackgroundModes": ["location"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -33,7 +37,23 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Naymly uses your camera to capture a photo of someone you just met.",
+          "photosPermission": "Naymly uses your photo library so you can attach an existing photo to a contact."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Naymly uses your location to show pinned places on the map.",
+          "locationAlwaysAndWhenInUsePermission": "Naymly uses your location, including in the background, to notify you when you arrive somewhere you've pinned a contact.",
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,
