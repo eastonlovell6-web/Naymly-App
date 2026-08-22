@@ -34,32 +34,45 @@ TaskManager.defineTask(
     data: GeofenceTaskData;
     error: TaskManager.TaskManagerError | null;
   }) => {
-    if (error) {
-      console.error('Geofencing task error:', error);
-      return;
-    }
-    if (data.eventType !== Location.GeofencingEventType.Enter) {
-      return;
-    }
+    try {
+      if (error) {
+        console.error('Geofencing task error:', error);
+        return;
+      }
+      if (data.eventType !== Location.GeofencingEventType.Enter) {
+        return;
+      }
 
-    const placeId = data.region.identifier;
-    if (!placeId) {
-      return;
-    }
+      const placeId = data.region.identifier;
+      if (!placeId) {
+        return;
+      }
 
-    const contact = await getContactForPlace(database, placeId);
-    if (!contact) {
-      return;
-    }
+      const contact = await getContactForPlace(database, placeId);
+      if (!contact) {
+        return;
+      }
 
-    const name = await contact.getName();
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: `Say hi to ${name}`,
-        body: "They're nearby.",
-      },
-      trigger: null,
-    });
+      let title = "Someone you've pinned is nearby";
+      let body = 'Open Naymly to see who.';
+      try {
+        const name = await contact.getName();
+        title = `Say hi to ${name}`;
+        body = "They're nearby.";
+      } catch (decryptError) {
+        console.error(
+          'Geofencing task: failed to decrypt contact name, using generic notification',
+          decryptError
+        );
+      }
+
+      await Notifications.scheduleNotificationAsync({
+        content: { title, body },
+        trigger: null,
+      });
+    } catch (taskError) {
+      console.error('Geofencing task failed:', taskError);
+    }
   }
 );
 
@@ -74,7 +87,7 @@ export async function requestLocationAndNotificationPermissions(): Promise<Permi
   const backgroundResult =
     foregroundResult.status === 'granted'
       ? await Location.requestBackgroundPermissionsAsync()
-      : { status: 'denied' as Location.PermissionStatus };
+      : { status: Location.PermissionStatus.DENIED };
   const notificationsResult = await Notifications.requestPermissionsAsync();
 
   return {

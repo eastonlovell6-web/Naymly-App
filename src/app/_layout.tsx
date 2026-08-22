@@ -1,3 +1,4 @@
+import * as Location from 'expo-location';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
@@ -22,9 +23,17 @@ export default function RootLayout() {
   }, [loadFromStorage]);
 
   useEffect(() => {
-    syncGeofences(database).catch((error) => {
-      console.error('Failed to sync geofences on launch:', error);
-    });
+    (async () => {
+      const { status } = await Location.getBackgroundPermissionsAsync();
+      if (status !== Location.PermissionStatus.GRANTED) {
+        return;
+      }
+      try {
+        await syncGeofences(database);
+      } catch (error) {
+        console.error('Failed to sync geofences on launch:', error);
+      }
+    })();
   }, []);
 
   return (

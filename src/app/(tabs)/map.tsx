@@ -1,7 +1,7 @@
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Text, View } from 'react-native';
+import { Alert, AppState, Linking, Text, View } from 'react-native';
 import MapView, { MapPressEvent, Marker, Region } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -17,21 +17,25 @@ import { requestLocationAndNotificationPermissions } from '@/lib/geofencing';
 export default function MapScreen() {
   const { places, removePlace } = useMapPlaces();
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const [locationError, setLocationError] = useState(false);
   const [initialRegion, setInitialRegion] = useState<Region | null>(null);
   const [selected, setSelected] = useState<{ place: Place; contact: Contact } | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      const result = await requestLocationAndNotificationPermissions();
-      if (!result.foreground || !result.background) {
-        if (!cancelled) setPermissionDenied(true);
-        return;
+  async function loadLocation(cancelledRef: { current: boolean }) {
+    const result = await requestLocationAndNotificationPermissions();
+    if (!result.foreground || !result.background || !result.notifications) {
+      if (!cancelledRef.current) {
+        setPermissionDenied(true);
+        setLocationError(false);
       }
+      return;
+    }
 
+    try {
       const position = await Location.getCurrentPositionAsync();
-      if (!cancelled) {
+      if (!cancelledRef.current) {
+        setPermissionDenied(false);
+        setLocationError(false);
         setInitialRegion({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
@@ -39,11 +43,29 @@ export default function MapScreen() {
           longitudeDelta: 0.05,
         });
       }
-    })();
+    } catch (error) {
+      console.error('Failed to get current location:', error);
+      if (!cancelledRef.current) {
+        setLocationError(true);
+      }
+    }
+  }
 
+  useEffect(() => {
+    const cancelledRef = { current: false };
+    loadLocation(cancelledRef);
     return () => {
-      cancelled = true;
+      cancelledRef.current = true;
     };
+  }, []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        loadLocation({ current: false });
+      }
+    });
+    return () => subscription.remove();
   }, []);
 
   function handleMapPress(event: MapPressEvent) {
@@ -87,10 +109,25 @@ export default function MapScreen() {
       <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-8">
         <Text className="text-center font-serif text-2xl text-ink">Location access needed</Text>
         <Text className="text-center text-base text-ink/60">
-          Naymly needs location access, including while the app is closed, to notify you when you
-          arrive at a place you&apos;ve pinned.
+          Naymly needs location access, including while the app is closed, and notification
+          permission, to notify you when you arrive at a place you&apos;ve pinned.
         </Text>
         <PrimaryButton label="Open Settings" onPress={() => Linking.openSettings()} />
+      </SafeAreaView>
+    );
+  }
+
+  if (locationError) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-8">
+        <Text className="text-center font-serif text-2xl text-ink">Couldn&apos;t find your location</Text>
+        <Text className="text-center text-base text-ink/60">
+          Check that Location Services are turned on, then try again.
+        </Text>
+        <PrimaryButton
+          label="Try Again"
+          onPress={() => loadLocation({ current: false })}
+        />
       </SafeAreaView>
     );
   }
