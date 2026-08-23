@@ -61,6 +61,7 @@ export function useVoiceCapture(onFinished: (outcome: VoiceCaptureOutcome) => vo
       lang: 'en-US',
       interimResults: true,
       continuous: true,
+      requiresOnDeviceRecognition: true,
     });
   }, [setStatusBoth]);
 

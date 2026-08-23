@@ -58,7 +58,7 @@ Deno.serve(async (req: Request) => {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 300,
+        max_tokens: 1024,
         system: EXTRACTION_SYSTEM_PROMPT,
         messages: [{ role: 'user', content: transcript }],
       }),
@@ -79,9 +79,14 @@ Deno.serve(async (req: Request) => {
     return Response.json(EMPTY_EXTRACTION);
   }
 
+  let cleanedText = text.trim();
+  if (cleanedText.startsWith('```')) {
+    cleanedText = cleanedText.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+  }
+
   let parsed: unknown;
   try {
-    parsed = JSON.parse(text);
+    parsed = JSON.parse(cleanedText);
   } catch {
     return Response.json(EMPTY_EXTRACTION);
   }

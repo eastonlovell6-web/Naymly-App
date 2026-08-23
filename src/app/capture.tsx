@@ -2,8 +2,18 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SymbolView } from 'expo-symbols';
-import { useState } from 'react';
-import { Alert, Image, Linking, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  AccessibilityInfo,
+  Alert,
+  Image,
+  Linking,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PrimaryButton } from '@/components/onboarding/primary-button';
@@ -43,6 +53,11 @@ export default function CaptureScreen() {
     );
     setScreenState('form');
   });
+
+  useEffect(() => {
+    if (voice.status !== 'listening' || voice.partialTranscript.length === 0) return;
+    AccessibilityInfo.announceForAccessibility(voice.partialTranscript);
+  }, [voice.status, voice.partialTranscript]);
 
   function handleEnterManually() {
     setScreenState('form');
@@ -157,7 +172,10 @@ export default function CaptureScreen() {
             )}
 
             {(voice.status === 'idle' || voice.status === 'permission-denied') && (
-              <Pressable onPress={handleEnterManually} accessibilityRole="button">
+              <Pressable
+                onPress={handleEnterManually}
+                accessibilityRole="button"
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
                 <Text className="text-sm font-semibold text-accent-terracotta">Enter manually instead</Text>
               </Pressable>
             )}
@@ -168,7 +186,7 @@ export default function CaptureScreen() {
               className="flex-1"
               contentContainerClassName="gap-6 py-6"
               keyboardShouldPersistTaps="handled">
-              {transcriptBanner && (
+              {transcriptBanner ? (
                 <View className="flex-row items-start justify-between gap-3 rounded-xl bg-background-alt px-4 py-3">
                   <View className="flex-1 gap-1">
                     <Text className="text-xs font-semibold text-ink/50">YOU SAID</Text>
@@ -177,7 +195,8 @@ export default function CaptureScreen() {
                   <Pressable
                     onPress={() => setTranscriptBanner(null)}
                     accessibilityRole="button"
-                    accessibilityLabel="Dismiss">
+                    accessibilityLabel="Dismiss"
+                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
                     <SymbolView
                       name={{ ios: 'xmark', android: 'close', web: 'close' }}
                       size={14}
@@ -185,7 +204,7 @@ export default function CaptureScreen() {
                     />
                   </Pressable>
                 </View>
-              )}
+              ) : null}
 
               <View className="items-center gap-3">
                 <Pressable
